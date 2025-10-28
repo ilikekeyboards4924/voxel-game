@@ -68,5 +68,9 @@ const shaderProgram = createProgram(vertexShader, fragmentShader);
 gl.useProgram(shaderProgram);
 
 
+const attributes = {
+    positionAttributeLocation: gl.getAttribLocation(shaderProgram, 'position'),
+};
 
-export { canvas, gl, shaderProgram };
+
+export { canvas, gl, shaderProgram, attributes };

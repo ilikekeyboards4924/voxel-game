@@ -12,6 +12,10 @@ npm install
 ```
 
 
+# common issues:
+- the "// for github" thing needs to be uncommented before pushing to main
+
+
 ### TODO
 - add obj file loader so i can make stuff in blender and add it here
 - finish making the old stuff in typescript
