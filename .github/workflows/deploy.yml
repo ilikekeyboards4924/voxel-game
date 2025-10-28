@@ -3,15 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Set this to the branch you push your code to
+      - main
 
 jobs:
-  build-and-deploy:
+  # The 'build' job creates the artifact
+  build-and-upload:
     runs-on: ubuntu-latest
-    permissions:
-      pages: write # Allow the action to create GitHub Pages deployments
-      id-token: write # Allow the action to create an authentication token
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Specify your project's Node.js version
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
@@ -30,8 +27,19 @@ jobs:
       - name: Upload production-ready artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # The directory containing your bundled files
+          path: './dist'
 
+  # The 'deploy' job deploys the artifact to GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-and-upload # This ensures the deploy job waits for the build to finish
+    permissions:
+      pages: write
+      id-token: write
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
