@@ -1,34 +1,136 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { canvas, gl, shaderProgram, attributes } from "./global";
+import { Camera } from "./camera";
+import { Cube } from "./cube";
 
-const vao = gl.createVertexArray();
-const positionBuffer = gl.createBuffer();
+interface Keyboard {
+    [key: string]: boolean;
+}
 
-const positionArray = new Float32Array([
-    // -1, -1,
-    // -1, 1,
-    // 1, 1,
+let keys: Keyboard = {};
 
-    1, 1,
-    1, -1,
-    -1, -1,
-
-    -1, -1,
-    1, -1,
-    0, 1
-]);
+const viewMatrix = mat4.create();
+const projectionMatrix = mat4.create();
+mat4.perspective(projectionMatrix, (90/360) * (2 * Math.PI), canvas.width/canvas.height, 0.1, 300);
 
 
-gl.bindVertexArray(vao);
+const camera = new Camera();
 
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, positionArray, gl.STATIC_DRAW);
+const cube = new Cube();
 
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.enableVertexAttribArray(attributes.positionAttributeLocation);
-gl.vertexAttribPointer(attributes.positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+function setViewMatrix() { // set the viewMatrix
+    const viewMatrixTarget = vec3.create();
+    vec3.add(viewMatrixTarget, camera.position, camera.front);
+    mat4.lookAt(viewMatrix, camera.position, viewMatrixTarget, camera.up);
+}
+
+function sendUniformsToShader() { // send matrix uniforms to the shader
+    gl.uniformMatrix4fv(attributes.viewMatrixUniformLocation, false, viewMatrix as Float32List);
+    gl.uniformMatrix4fv(attributes.projectionMatrixUniformLocation, false, projectionMatrix as Float32List);
+}
+
+function update() {
+    // game update stuff here
+    const speed = 0.1;
+    if (keys['d']) vec3.scaleAndAdd(camera.position, camera.position, camera.right, speed);
+    if (keys['a']) vec3.scaleAndAdd(camera.position, camera.position, camera.right, -speed);
+
+    if (keys['w']) vec3.scaleAndAdd(camera.position, camera.position, camera.frontXZ, speed);
+    if (keys['s']) vec3.scaleAndAdd(camera.position, camera.position, camera.frontXZ, -speed);
+
+    // keep these in case the other controls are too annoying
+    if (keys['e']) vec3.scaleAndAdd(camera.position, camera.position, camera.up, speed);
+    if (keys['q']) vec3.scaleAndAdd(camera.position, camera.position, camera.up, -speed);
+
+    if (keys[' ']) vec3.scaleAndAdd(camera.position, camera.position, camera.up, speed);
+    if (keys['Shift']) vec3.scaleAndAdd(camera.position, camera.position, camera.up, -speed); // used to be Control but Control + w closes tab :(
+
+    if (keys['ArrowLeft']) camera.yaw -= 0.04;
+    if (keys['ArrowRight']) camera.yaw += 0.04;
+
+    if (keys['ArrowUp']) camera.pitch += 0.04;
+    if (keys['ArrowDown']) camera.pitch -= 0.04;
+
+    camera.updateCamera();
+
+    setViewMatrix();
+    sendUniformsToShader();
+}
+
+function render() { // do the actual drawing here
+    // set up webgl stuff
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.useProgram(shaderProgram);
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);    
+
+    gl.enable(gl.DEPTH_TEST); // enable to sort properly
+    // gl.disable(gl.DEPTH_TEST); // enable to sort properly
 
 
-gl.drawArrays(gl.TRIANGLES, 0, 12);
+    // uncomment this to hide faces inside of cube/other thing
+    // gl.enable(gl.CULL_FACE);
+    // gl.cullFace(gl.BACK);
 
-gl.bindVertexArray(null);
+    // do drawing below here
+    cube.draw();
+}
+
+
+
+// key and mouse handlers
+function keyHandler(event: KeyboardEvent) {
+    const isCtrl = event.ctrlKey || event.metaKey;
+
+    if (isCtrl && (event.key.toLowerCase() === 'w' || event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 's' || event.key.toLowerCase() === 'd')) {
+        event.preventDefault(); // stop the browser from being annoying
+    }
+
+    if (event.type == 'keyup') keys[event.key] = false;
+
+    if (keys[event.key]) return;
+    if (event.type == 'keydown') keys[event.key] = true;
+}
+
+canvas.addEventListener('click', () => {
+    canvas.requestPointerLock();
+});
+
+document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === canvas) {
+        console.log('Pointer locked! Mouse is hidden.');
+    } else {
+        console.log('Pointer unlocked.');
+    }
+});
+
+document.addEventListener('mousemove', (event) => {
+    if (document.pointerLockElement === canvas) {
+        const movementX = event.movementX;
+        const movementY = event.movementY;
+
+        camera.yaw   += movementX * 0.004;  // sensitivity
+        camera.pitch -= movementY * 0.004;
+    }
+});
+
+document.addEventListener('keydown', keyHandler);
+document.addEventListener('keyup', keyHandler);
+
+
+
+let lastTime = 0;
+const targetFps = 90;
+
+function main(time=0) {
+    if (time - lastTime >= 1000/targetFps) {
+        update();
+        render();
+        lastTime = time;
+    }
+
+    requestAnimationFrame(main);
+}
+
+main();

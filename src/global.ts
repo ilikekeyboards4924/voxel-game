@@ -3,7 +3,7 @@ if (!canvas) throw new Error('canvas missing or something else wrong');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const gl = canvas.getContext('webgl2');
+const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
 if (!gl) throw new Error('bruhhhhhh... webgl aint working');
 
 const ext = gl!.getExtension('EXT_color_buffer_float');
@@ -48,19 +48,32 @@ function createProgram(vsSrc: string, fsSrc: string){
 
 
 const vertexShader = `#version 300 es
-    in vec2 position;
+    in vec3 position;
+    in vec4 color;
 
+    uniform mat4 modelMatrix;
+    uniform mat4 viewMatrix;
+    uniform mat4 projectionMatrix;
+
+    out vec4 colorFrag;
+    
     void main(){
-        gl_Position = vec4(position, 1.0, 1.0);
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+
+        colorFrag = color;
     }
 `;
 
 const fragmentShader = `#version 300 es
     precision mediump float;
+    in vec4 colorFrag;
+
     out vec4 outColor;
 
     void main(){
-        outColor = vec4(0.392, 0.584, 0.929, 1.0); // cornflower blue
+        // outColor = vec4(0.392, 0.584, 0.929, 1.0); // cornflower blue
+
+        outColor = colorFrag;
     }
 `;
 
@@ -70,6 +83,11 @@ gl.useProgram(shaderProgram);
 
 const attributes = {
     positionAttributeLocation: gl.getAttribLocation(shaderProgram, 'position'),
+    colorAttributeLocation: gl.getAttribLocation(shaderProgram, 'color'),
+
+    modelMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'modelMatrix'),
+    viewMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'viewMatrix'),
+    projectionMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'projectionMatrix'),
 };
 
 
