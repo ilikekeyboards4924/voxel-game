@@ -24,6 +24,10 @@ jobs:
       - name: Build with Webpack
         run: npm run build
 
+      # Add this new step to inspect the directory
+      - name: List contents of project directory
+        run: ls -R
+
       - name: Upload production-ready artifact
         uses: actions/upload-pages-artifact@v3
         with:
