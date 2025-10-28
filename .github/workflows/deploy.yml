@@ -1,0 +1,37 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Set this to the branch you push your code to
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # Allow the action to create GitHub Pages deployments
+      id-token: write # Allow the action to create an authentication token
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Specify your project's Node.js version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Webpack
+        run: npm run build
+
+      - name: Upload production-ready artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist' # The directory containing your bundled files
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
