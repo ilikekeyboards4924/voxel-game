@@ -90,7 +90,6 @@ class Cube {
             }
         });
 
-        console.log(colors);
 
         gl.bindVertexArray(this.vao); // start writing to the VAO
 
