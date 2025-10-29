@@ -1,22 +1,13 @@
 import { mat4, vec3 } from "gl-matrix";
-import { canvas, gl, shaderProgram, attributes } from "./global";
-import { Camera } from "./camera";
+import { canvas, gl, shaderProgram, attributes, 
+         camera, viewMatrix, projectionMatrix } from "./global";
+import { keys } from "./input";
 import { Cube } from "./cube";
 
-interface Keyboard {
-    [key: string]: boolean;
-}
-
-let keys: Keyboard = {};
-
-const viewMatrix = mat4.create();
-const projectionMatrix = mat4.create();
-mat4.perspective(projectionMatrix, (90/360) * (2 * Math.PI), canvas.width/canvas.height, 0.1, 300);
-
-
-const camera = new Camera();
 
 const cube = new Cube();
+const cube2 = new Cube();
+mat4.translate(cube2.modelMatrix, cube2.modelMatrix, vec3.fromValues(4, 0, 0));
 
 function setViewMatrix() { // set the viewMatrix
     const viewMatrixTarget = vec3.create();
@@ -75,54 +66,13 @@ function render() { // do the actual drawing here
 
     // do drawing below here
     cube.draw();
+    cube2.draw();
 }
-
-
-
-// key and mouse handlers
-function keyHandler(event: KeyboardEvent) {
-    const isCtrl = event.ctrlKey || event.metaKey;
-
-    if (isCtrl && (event.key.toLowerCase() === 'w' || event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 's' || event.key.toLowerCase() === 'd')) {
-        event.preventDefault(); // stop the browser from being annoying
-    }
-
-    if (event.type == 'keyup') keys[event.key] = false;
-
-    if (keys[event.key]) return;
-    if (event.type == 'keydown') keys[event.key] = true;
-}
-
-canvas.addEventListener('click', () => {
-    canvas.requestPointerLock();
-});
-
-document.addEventListener('pointerlockchange', () => {
-    if (document.pointerLockElement === canvas) {
-        console.log('Pointer locked! Mouse is hidden.');
-    } else {
-        console.log('Pointer unlocked.');
-    }
-});
-
-document.addEventListener('mousemove', (event) => {
-    if (document.pointerLockElement === canvas) {
-        const movementX = event.movementX;
-        const movementY = event.movementY;
-
-        camera.yaw   += movementX * 0.004;  // sensitivity
-        camera.pitch -= movementY * 0.004;
-    }
-});
-
-document.addEventListener('keydown', keyHandler);
-document.addEventListener('keyup', keyHandler);
 
 
 
 let lastTime = 0;
 const targetFps = 90;
-
 function main(time=0) {
     if (time - lastTime >= 1000/targetFps) {
         update();

@@ -1,4 +1,7 @@
-const canvas = document.getElementsByTagName('canvas').item(0);
+import { Camera } from "./camera";
+import { mat4 } from "gl-matrix";
+
+const canvas = <HTMLCanvasElement> document.getElementsByTagName('canvas').item(0);
 if (!canvas) throw new Error('canvas missing or something else wrong');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -90,5 +93,13 @@ const attributes = {
     projectionMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'projectionMatrix'),
 };
 
+const camera = new Camera();
 
-export { canvas, gl, shaderProgram, attributes };
+const viewMatrix = mat4.create();
+const projectionMatrix = mat4.create();
+mat4.perspective(projectionMatrix, (90/360) * (2 * Math.PI), canvas.width/canvas.height, 0.1, 300);
+
+
+
+export { canvas, gl, shaderProgram, attributes, 
+         camera, viewMatrix, projectionMatrix };

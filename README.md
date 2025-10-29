@@ -17,5 +17,6 @@ npm install
 
 
 ### TODO
-- add obj file loader so i can make stuff in blender and add it here
+- finish adding obj file loader so i can make stuff in blender and add it here
 - finish making the old stuff in typescript
+- add textures to a cube

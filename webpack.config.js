@@ -4,6 +4,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -17,20 +18,25 @@ const config = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: '/voxel-game/', // for github
+        // publicPath: '/voxel-game/', // for github
     },
     devServer: {
         open: true,
         host: 'localhost',
-        // static: {
-        //     directory: path.join(__dirname, 'dist'),
-        // },
+        static: {
+            directory: path.join(__dirname, 'src'),
+        },
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: 'index.html',
         }),
-
+        new CopyPlugin({
+            patterns: [
+                { from: 'src/assets/models/*.obj', to: 'assets/models/[name][ext]' },
+                // Add other static assets here if needed, like textures
+            ],
+        }),
         // Add your plugins here
         // Learn more about plugins from https://webpack.js.org/configuration/plugins/
     ],
@@ -55,6 +61,10 @@ const config = {
                 use: ['html-loader'],
             },
 
+            {
+                test: /\.obj$/, // Matches files with the .obj extension
+                type: 'asset/resource', // Use Webpack's Asset Modules
+            },
             // Add your rules for custom modules here
             // Learn more about loaders from https://webpack.js.org/loaders/
         ],
