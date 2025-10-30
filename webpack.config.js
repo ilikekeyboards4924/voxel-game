@@ -18,7 +18,7 @@ const config = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        // publicPath: '/voxel-game/', // for github
+        publicPath: '/voxel-game/', // for github
     },
     devServer: {
         open: true,
