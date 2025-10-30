@@ -34,6 +34,7 @@ const config = {
         new CopyPlugin({
             patterns: [
                 { from: 'src/assets/models/*.obj', to: 'assets/models/[name][ext]' },
+                { from: 'src/assets//*.png', to: 'assets/[name][ext]' },
                 // Add other static assets here if needed, like textures
             ],
         }),
