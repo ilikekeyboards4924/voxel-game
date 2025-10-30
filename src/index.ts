@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "gl-matrix";
 import { canvas, gl, shaderProgram, attributes, 
-         camera, viewMatrix, projectionMatrix } from "./global";
+         camera, viewMatrix, projectionMatrix, publicPath } from "./global";
 import { keys } from "./input";
 import { Cube } from "./cube";
 
@@ -14,7 +14,7 @@ gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new
 
 
 let image = new Image();
-image.src = './assets/jabber.png';
+image.src = `${publicPath}assets/jabber.png`;
 image.addEventListener('load', (event) => {
 
     gl.bindTexture(gl.TEXTURE_2D, texture);

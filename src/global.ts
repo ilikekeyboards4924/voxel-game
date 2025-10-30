@@ -111,7 +111,7 @@ const viewMatrix = mat4.create();
 const projectionMatrix = mat4.create();
 mat4.perspective(projectionMatrix, (90/360) * (2 * Math.PI), canvas.width/canvas.height, 0.1, 300);
 
-
+const publicPath = '/voxel-game/'; // annoying
 
 export { canvas, gl, shaderProgram, attributes, 
-         camera, viewMatrix, projectionMatrix };
+         camera, viewMatrix, projectionMatrix, publicPath };
