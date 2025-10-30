@@ -6,8 +6,25 @@ import { Cube } from "./cube";
 
 
 const cube = new Cube();
-const cube2 = new Cube();
-mat4.translate(cube2.modelMatrix, cube2.modelMatrix, vec3.fromValues(4, 0, 0));
+
+let texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, texture);
+ 
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+
+
+let image = new Image();
+image.src = './assets/jabber.png';
+image.addEventListener('load', (event) => {
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    cube.init(texture);
+});
+
+
 
 function setViewMatrix() { // set the viewMatrix
     const viewMatrixTarget = vec3.create();
@@ -66,7 +83,6 @@ function render() { // do the actual drawing here
 
     // do drawing below here
     cube.draw();
-    cube2.draw();
 }
 
 

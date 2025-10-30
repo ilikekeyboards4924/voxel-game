@@ -52,31 +52,39 @@ function createProgram(vsSrc: string, fsSrc: string){
 
 const vertexShader = `#version 300 es
     in vec3 position;
-    in vec4 color;
+    // in vec4 color;
+    in vec2 textureCoordinates;
 
     uniform mat4 modelMatrix;
     uniform mat4 viewMatrix;
     uniform mat4 projectionMatrix;
 
-    out vec4 colorFrag;
+    // out vec4 colorFrag;
+    out vec2 fragmentTextureCoordinates;
     
     void main(){
         gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
 
-        colorFrag = color;
+        // colorFrag = color;
+        fragmentTextureCoordinates = textureCoordinates;
     }
 `;
 
 const fragmentShader = `#version 300 es
     precision mediump float;
-    in vec4 colorFrag;
+    // in vec4 colorFrag;
+    in vec2 fragmentTextureCoordinates;
+
+    uniform sampler2D u_texture;
 
     out vec4 outColor;
 
+
     void main(){
         // outColor = vec4(0.392, 0.584, 0.929, 1.0); // cornflower blue
+        // outColor = colorFrag;
 
-        outColor = colorFrag;
+        outColor = texture(u_texture, fragmentTextureCoordinates);
     }
 `;
 
@@ -87,10 +95,14 @@ gl.useProgram(shaderProgram);
 const attributes = {
     positionAttributeLocation: gl.getAttribLocation(shaderProgram, 'position'),
     colorAttributeLocation: gl.getAttribLocation(shaderProgram, 'color'),
+    
+    textureCoordinatesAttributeLocation: gl.getAttribLocation(shaderProgram, 'textureCoordinates'),
 
     modelMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'modelMatrix'),
     viewMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'viewMatrix'),
     projectionMatrixUniformLocation: gl.getUniformLocation(shaderProgram, 'projectionMatrix'),
+
+    textureUniformLocation: gl.getUniformLocation(shaderProgram, 'u_texture'),
 };
 
 const camera = new Camera();
